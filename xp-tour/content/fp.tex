@@ -1,0 +1,264 @@
+\section{函数式}
+\label{sec:oo}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{函数式}}
+  \end{center}
+\end{frame}
+
+\subsection{引入lambda}
+
+\begin{frame}[fragile]{重构times}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+
+  static Rule times(int n, String word) {
+    return (int m) -> {
+      return m % n == 0 ? word : "";
+    };
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{类型推演}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+
+  static Rule times(int n, String word) {
+    return m -> m % n == 0 ? word : "";
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{重构contains}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+public interface Rule {
+  String apply(int n);
+
+  static Rule contains(int n, String word) {
+    return m -> valueOf(m).contains(valueOf(m)) ? word : "";
+  }
+}
+  \end{java}
+\end{frame}
+
+
+\begin{frame}[fragile]{重构defaults}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+public interface Rule {
+  String apply(int n);
+
+  static Rule defaults() {
+    return m -> valueOf(m);
+  }  
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{重构allof}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+public interface Rule {
+  String apply(int n);
+
+  static Rule allof(Rule... rules) {
+    return m -> {
+      StringBuilder result = new StringBuilder();
+      for (Rule rule : rules) {
+        result.append(rule.apply(m));
+      }
+      return result.toString();
+    };
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{重构anyof}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+public interface Rule {
+  String apply(int n);
+
+  public static Rule anyof(Rule... rules) {
+    return m -> {
+      for (Rule rule : rules) {
+        String result = rule.apply(m);
+        if (!result.isEmpty())
+          return result;
+      }
+      return "";
+    };
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{结构性重复}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+public interface Rule {
+  String apply(int n);
+
+  static Rule times(int n, String word) {
+    return m -> m % n == 0 ? word : "";
+  }
+
+  static Rule contains(int n, String word) {
+    return m -> valueOf(m).contains(valueOf(m)) ? word : "";
+  }
+
+  static Rule defaults() {
+    return m -> true ? valueOf(m) : "";
+  }  
+}
+  \end{java}
+\end{frame}
+
+\subsection{匹配器}
+
+\begin{frame}[fragile]{匹配器}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+@FunctionalInterface
+public interface Matcher {
+  boolean matches(int n);
+
+  static Matcher times(int n) {
+    return m -> m % n == 0;
+  }
+
+  static Matcher contains(int n) {
+    return m -> valueOf(m).contains(valueOf(n));
+  }
+
+  static Matcher always() {
+    return m -> true;
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{执行器}
+
+\begin{frame}[fragile]{执行器}
+  \begin{java}
+@FunctionalInterface
+public interface Action {
+  String to(int n);
+
+  static Action to(String word) {
+    return n -> word;
+  }
+
+  static Action nop() {
+    return n -> String.valueOf(n);
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{方法引用}
+  \begin{java}
+@FunctionalInterface
+public interface Action {
+  String to(int n);
+
+  static Action to(String word) {
+    return n -> word;
+  }
+
+  static Action nop() {
+    return String::valueOf;
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{规则库}
+
+\begin{frame}[fragile]{改善表达力}
+  \begin{java}
+import static fizz.buzz.whizz.Matcher.*
+import static fizz.buzz.whizz.Action.*
+import static fizz.buzz.whizz.Rule.*
+
+class RuleSpec extends Specification {
+  private static def spec() {
+    Rule r_n1 = atom(times(3), to("Fizz"))
+    Rule r_n2 = atom(times(5), to("Buzz"))
+    Rule r_n3 = atom(times(7), to("Whizz"))
+
+    Rule r3 = atom(contains(3), to("Fizz"))
+    Rule r2 = allof(r1_3, r1_5, r1_7)
+    Rule rd = atom(always(), nop())
+
+    anyof(r3, r2, rd)
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{规则库: atom}
+  \begin{java}
+@FunctionalInterface
+public interface Rule {
+  String apply(int m);
+
+  static Rule atom(Matcher matcher, Action action) {
+    return m -> matcher.matches(m) ? action.to(m) : "";
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{规则库: allof}
+  \begin{java}
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+
+@FunctionalInterface
+public interface Rule {
+  String apply(int m);
+
+  static Rule allof(Rule... rules) {
+    return m -> stream(rules)
+      .map(r -> r.apply(m));
+      .collect(joining());
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{规则库: anyof}
+  \begin{java}
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+
+@FunctionalInterface
+public interface Rule {
+  String apply(int m);
+
+  static Rule anyof(Rule... rules) {
+    return m -> stream(rules)
+      .map(r -> r.apply(m))
+      .filter(s -> !s.isEmpty())
+      .findFirst()
+      .orElse("");
+  }
+}
+  \end{java}
+\end{frame}

@@ -1,0 +1,40 @@
+\section{提出问题}
+\label{sec:problem}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{提出问题}}
+  \end{center}
+\end{frame}
+
+\subsection{提出问题}
+
+\begin{frame}[fragile]{需求}
+  \begin{block}{老师说出3个特殊数，例如3, 5, 7，让100个学生依次报数}
+  \begin{enumerate}
+    \item 如果所报数字是「第一个特殊数(3)」的倍数时说Fizz；如果所报数字是「第二个特殊数(5)」的倍数时说Buzz；如果所报数字是「第三个特殊数(7)」的倍数时说Whizz；
+    \item 如果所报数字同时是「两个特殊数」的倍数，也要特殊处理。例如，如果是「第一个(3)」和「第二个(5)」特殊数的倍数，那么也不能说该数字，而是要说FizzBuzz。以此类推，如果同时是三个特殊数的倍数，那么要说FizzBuzzWhizz；
+    \item 如果所报数字包含了「第1个(3)」特殊数时，忽略规则1和2，直接说Fizz。例如，要报13的同学应该说Fizz；要报35，它既包含3，同时也是5和7的倍数，要说Fizz，而不能说BuzzWhizz；
+    \item 否则，直接说出要报的数字。
+  \end{enumerate}
+  \end{block}  
+\end{frame}
+
+\begin{frame}[fragile]{形式化}
+  \begin{c++}
+r1:
+- times(3) -> Fizz
+- times(5) -> Buzz
+- times(7) -> Whizz
+r2:
+- times(3) && times(5) && times(7) -> FizzBuzzWhizz
+- times(3) && times(5) -> FizzBuzz
+- times(3) && times(7) -> FizzWhizz
+- times(5) && times(7) -> BuzzWhizz
+r3:
+- contains(3) -> Fizz
+- the priority of contains(3) is highest
+rd:
+- num -> "num"
+  \end{c++}
+\end{frame}

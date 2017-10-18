@@ -1,0 +1,198 @@
+\section{类设计}
+\label{sec:class}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{类设计}}
+  \end{center}
+\end{frame}
+
+% \begin{frame}[fragile]{VBD: Volatility Based Decomposition}
+% \begin{enumerate}
+%   \item \alert{目的：} 信息隐藏，封装变化，局部性修改
+%   \item \alert{手段：} 职责划分，分离变化，控制依赖
+% \end{enumerate}
+% \end{frame}
+
+\subsection{延迟初始化}
+
+\begin{frame}[fragile]{原生内存块}
+\begin{enumerate}
+  \item 对象数组成员的初始化
+  \item Union语义
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Placement}
+\begin{c++}
+template <typename T>
+struct Placement {
+  void* alloc() {
+    return (void*)&buff;
+  }
+
+  void free() {
+    ((T*)&buff)->~T();
+  }
+
+  T* operator->() const {
+    return (T*)&buff;
+  }
+
+  T& operator*() const {
+    return (T&)buff;
+  }
+
+private:
+  std::aligned_storage_t<sizeof(T)> buff;
+};
+\end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{应用placement new}
+\begin{c++}
+struct ErabList {
+  ErabList() : num(0) {}
+
+  ~ErabList() {
+    for (int i = 0; i < num; i++) {
+      erabs[i].free();
+    }
+  }
+
+  void addErab(int id) {
+    if (num < MAX_ERAB_NUM) {
+      new (erabs[num++].alloc()) Erab(id);
+    }
+  }
+
+private:
+  enum { MAX_ERAB_NUM = 8; };
+  
+  int num;
+  Placement<Erab> erabs[MAX_ERAB_NUM];
+};
+\end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{工厂方法}
+\begin{c++}
+namespace {
+  union AccountMemery {
+    Placement<LocalAccount>  local;
+    Placement<RemoteAccount> remote;
+  } m;
+}
+
+Account* AccountFactory::create(AccountType type) {
+  switch(type) {
+    case LOCAL_ACCOUNT: 
+      return new (m.local.alloc()) LocalAccount;
+    case REMOTE_ACCOUNT: 
+      return new (m.remote.alloc()) RemoteAccount;
+    default: break;
+  }
+  return nullptr;
+}
+\end{c++}
+\end{frame}
+
+\subsection{继承}
+
+\begin{frame}[fragile]{final}
+\begin{enumerate}
+  \item 并非为了安全地进行子类化而设计的类，std::string, std::vector
+  \item 设计不可变类,保证多线程的安全性
+  \item 危害：public non-virtual destructor  
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{不具有多态性的基类}
+\begin{enumerate}
+  \item std::input\_iterator\_tag, std::unary\_function
+  \item protected non-virtual destructor
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{多态基类}
+\begin{enumerate}
+  \item as base class
+  \item public virtual destructor
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{虚函数}
+\begin{enumerate}
+  \item 纯虚函数：为了让子类只继承其接口
+  \item 虚函数：让子类继承接口和一份默认的实现
+  \item 非虚函数：让子类继承其接口和一份强制性的实现
+\end{enumerate}
+\end{frame}
+
+\subsection{拒绝}
+
+\begin{frame}[fragile]{工具类}
+\begin{c++}
+struct StringUtils {
+  static std::string toString(int n);  
+
+private:
+  StringUtils();  
+};
+\end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{工具类}
+\begin{c++}
+struct StringUtils {  
+  StringUtils() = delete;
+  
+  static std::string toString(int n);
+};
+\end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{阻止拷贝/赋值}
+\begin{c++}
+struct Test {
+  Test(const std::string& name);
+
+private:
+  Test(const Test&);            // don't implements
+  Test& operator=(const Test&); // don't implements
+};
+
+\end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{实用宏}
+\begin{c++}
+#define DISALLOW_COPY(classname) private:  \
+  className(const className&)
+
+#define DISALLOW_ASSIGN(classname) private: \
+  className& operator=(const className&)
+
+#define DISALLOW_COPY_AND_ASSIGN(className) \
+  DISALLOW_COPY(classname); \ 
+  DISALLOW_ASSIGN(classname)
+
+struct Test {
+  Test(const std::string& name);
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(Test)
+};
+\end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{实用宏}
+\begin{c++}
+struct Test {
+  Test(const std::string& name);
+
+  Test(const Test&) = delete;
+  Test& operator=(const Test&) = delete;
+};
+\end{c++}
+\end{frame}

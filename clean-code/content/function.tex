@@ -1,0 +1,119 @@
+\section{函数设计}
+\label{sec:function}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{函数设计}}
+  \end{center}
+\end{frame}
+
+\subsection{提取函数}
+
+\begin{frame}[fragile]{原则}
+\begin{enumerate}
+  \item 只做一件事，并做好这件事
+  \item 函数中的每一个语句都在一个相同的抽象层次上
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{技巧}
+\begin{enumerate}
+  \item 在同一个抽象层次
+  \item 命名意图明确
+  \item 对称性
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+template <typename E>
+void List<E>::add(const E& e) {
+  if (!readOnly) {
+    int newSize = size + 1;
+    if (newSize > elements.length) {
+      E* newElements = new E[elements.length + 10];
+      for (int i = 0; i < size; i++) {
+        newElements[i] = elements[i];
+        delete [] elements;
+      }
+      elements = newElements;
+    }
+    elements[size++] = e;
+  }
+}
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+template <typename E>
+void List<E>::add(const E& element) {
+  if (readOnly) 
+    return;
+  if (atCapacity()) 
+    grow();
+  addElement(element);
+}
+  \end{c++}
+\end{frame}
+
+\subsection{重载函数}
+
+\begin{frame}[fragile]{反例}
+\begin{c++}
+struct ObjectOutputStream {
+  virtual ~ObjectOutputStream() {}
+  virtual void write(bool) = 0;
+  virtual void write(char) = 0;
+  virtual void write(short) = 0;
+  virtual void write(int) = 0;
+  virtual void write(long) = 0;
+  virtual void write(float) = 0;
+  virtual void write(double) = 0;
+};
+\end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+\begin{c++}
+struct ObjectOutputStream {
+  virtual ~ObjectOutputStream() {}
+  virtual void writeBool(bool) = 0;
+  virtual void writeChar(char) = 0;
+  virtual void writeShort(short) = 0;
+  virtual void writeInt(int) = 0;
+  virtual void writeLong(long) = 0;
+  virtual void writeFloat(float) = 0;
+  virtual void writeDouble(double) = 0;
+};
+\end{c++}
+\end{frame}
+
+\subsection{火车失事}
+
+\begin{frame}[fragile]{反例}
+\begin{block}{违背Demeter法则}
+\begin{c++}
+std::string outputDir = ctxt.getOptions()
+  .getScratchDir()
+  .getAbsolutePath();
+\end{c++}
+\end{block}
+
+\begin{block}{用户接口}
+\begin{c++}
+std::string outFile = outputDir + File::SEPERATOR + fileName;
+FileOutputStream ss(outFile);
+\end{c++}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+\begin{block}{搬迁职责, 隐藏实现}
+\begin{c++}
+FileOutputStream ss;
+ctxt.readScratchFile(ss, fileName);
+\end{c++}
+\end{block}
+\end{frame}
+

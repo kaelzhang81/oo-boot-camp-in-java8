@@ -1,0 +1,62 @@
+\section{编程环境}
+\label{sec:prog-env}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{编程环境}}
+  \end{center}
+\end{frame}
+
+\subsection{搭建工程}
+
+\begin{frame}[fragile]{build.gradle}
+  \begin{scala}
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+jar {
+  baseName = 'fizz-buzz-whizz'
+  version = '1.0.0'
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile 'org.codehaus.groovy:groovy-all:2.4.1'
+  testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{环境需求}
+  \begin{block}{}
+  \begin{itemize}
+    \item \alert{测试：} Spock(Groovy)
+    \item \alert{实现：} Java8
+  \end{itemize}
+  \end{block}
+\end{frame}
+
+\subsection{破冰}
+
+\begin{frame}[fragile]{Spock}
+  \begin{scala}
+import spock.lang.Specification
+  
+class RuleSpec extends Specification {
+  def "should fail"() {
+    expect:
+    1 == 2
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{Gradle}
+  \begin{scala}
+$ gradle wrapper
+$ ./gradlew test 
+  \end{scala}
+\end{frame}

@@ -1,0 +1,67 @@
+\section{注释}
+\label{sec:comment}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{注释}}
+  \end{center}
+\end{frame}
+
+\subsection{命名优于注释}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+int time; // elapsed time in days  
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+int elapsedTimeInDays;
+  \end{c++}
+\end{frame}
+
+\subsection{坏味道}
+
+\begin{frame}[fragile]{冗余注释}
+\begin{c++}
+/**
+ * Constructor
+ */
+InvokedAtMost(int times);
+
+/**
+ * @param Invocation
+ * @return bool
+ */
+bool matches(const Invocation&) const;
+\end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{常见坏味道}
+\begin{enumerate}
+  \item 误导性、过时的、与设计实现不匹配的注释
+  \item 日志型、归属、签名的注释
+  \item // end if, // end while, // end for, // end try的注释
+  \item 已注释掉的代码未删除
+\end{enumerate}
+\end{frame}
+
+\subsection{有意义的注释}
+
+\begin{frame}[fragile]{必要性}
+\begin{enumerate}
+  \item 代码无法表达明确的意图时
+  \item 如果在代码中存在特殊的陷阱或实现方式时
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{可读性}
+\begin{c++}
+// Fast version of "hash = (65599 * hash) + c"
+hash = (hash << 6) + (hash << 16) - hash + c;
+
+// kk::mm::ss, MM dd, yyyy
+std::string timePattern = "\\d{2}:\\d{2}:\\d{2}, \\d{2} \\d{2}, \\d{4}";
+\end{c++}
+\end{frame}

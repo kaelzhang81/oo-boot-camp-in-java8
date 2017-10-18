@@ -1,0 +1,578 @@
+\section{面向对象}
+\label{sec:oo}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{面向对象}}
+  \end{center}
+\end{frame}
+
+\subsection{迭代1}
+
+\begin{frame}[fragile]{第一个测试用例}
+  \begin{scala}
+import spock.lang.Specification
+
+class RuleSpec extends Specification {
+  def "times(3) -> Fizz"() {
+    expect:
+    new Times(3, "Fizz").apply(3 * 2) == "Fizz"
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{通过测试}
+  \begin{java}
+public class Times {
+  public Times(int n, String word) {
+  }
+
+  public String apply(int m) {
+    return "Fizz";
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{实现Times}
+  \begin{java}
+public class Times {
+  private final int n;
+  private final String word;
+
+  public Times(int n, String word) {
+    this.n = n;
+    this.word = word;
+  }
+
+  public String apply(int m) {
+    return m % n == 0 ? word : "";
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{迭代2}
+
+\begin{frame}[fragile]{第2个测试用例}
+  \begin{scala}
+import spock.lang.Specification
+
+class RuleSpec extends Specification {
+  def "contains(3) -> Fizz"() {
+    expect:
+    new Contains(3, "Fizz").apply(13) == "Fizz"
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现Contains}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+public class Contains {
+  private final int n;
+  private final String word;
+
+  public Contains(int n, String word) {
+    this.n = n;
+    this.word = word;
+  }
+
+  public String apply(int m) {
+    return valueOf(m).contains(valueOf(m)) ? word : "";
+  }
+}  
+  \end{java}
+\end{frame}
+
+\subsection{迭代3}
+
+\begin{frame}[fragile]{第3个测试用例}
+  \begin{scala}
+import spock.lang.Specification
+
+class RuleSpec extends Specification {
+  def "default: 2 -> str(2)"() {
+    expect:
+    new Default().apply(2) == "2"
+  }
+}  
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现Default}
+  \begin{java}
+public class Default {
+  public String apply(int m) {
+    return String.valueOf(m);
+  }
+}  
+  \end{java}
+\end{frame}
+
+\subsection{抽象规则}
+
+\begin{frame}[fragile]{提取抽象}
+  \begin{java}
+@FunctionalInterface
+public interface Rule {
+  String apply(int n);
+}  
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{提取抽象: Times}
+  \begin{java}
+public class Times implements Rule {
+  private final int n;
+  private final String word;
+
+  public Times(int n, String word) {
+    this.n = n;
+    this.word = word;
+  }
+
+  @Override
+  public String apply(int m) {
+    return m % n == 0 ? word : "";
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{提取抽象: Contains}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+public class Contains implements Rule {
+  private final int n;
+  private final String word;
+
+  public Contains(int n, String word) {
+    this.n = n;
+    this.word = word;
+  }
+
+  @Override
+  public String apply(int m) {
+    return valueOf(m).contains(valueOf(m)) ? word : "";
+  }
+}  
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{提取抽象: Default}
+  \begin{java}
+public class Default implements Rule {
+  @Override
+  public String apply(int m) {
+    return String.valueOf(m);
+  }
+}  
+  \end{java}
+\end{frame}
+
+\subsection{迭代4}
+
+\begin{frame}[fragile]{第4个测试用例}
+  \begin{scala}
+import spock.lang.Specification
+
+class RuleSpec extends Specification {
+  def "times(3) && times(5) -> FizzBuzz"() {
+    expect:
+    new AllOf(
+        new Times(3, "Fizz"),
+        new Times(5, "Buzz")
+    ).apply(3*5) == "FizzBuzz"
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现AllOf}
+  \begin{java}
+public class AllOf implements Rule {
+  private Rule[] rules;
+
+  public AllOf(Rule... rules) {
+    this.rules = rules;
+  }
+
+  @Override
+  public String apply(int n) {
+    StringBuilder result = new StringBuilder();
+    for (Rule rule : rules) {
+      result.append(rule.apply(n));
+    }
+    return result.toString();
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{迭代5}
+
+\begin{frame}[fragile]{第5个测试用例}
+  \begin{scala}
+import spock.lang.Specification
+
+class RuleSpec extends Specification {
+  def "times(3) || times(5) -> Fizz || Buzz"() {
+    expect:
+    new AnyOf(
+        new Times(3, "Fizz"),
+        new Times(5, "Buzz"),
+    ).apply(3*5) == "Fizz"
+
+    new AnyOf(
+        new Times(5, "Buzz"),
+        new Times(3, "Fizz"),
+    ).apply(3*5) == "Buzz"    
+  }
+}  
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现AnyOf}
+  \begin{java}
+public class AnyOf implements Rule {
+  private Rule[] rules;
+
+  public AnyOf(Rule... rules) {
+    this.rules = rules;
+  }
+
+  @Override
+  public String apply(int n) {
+    for (Rule rule : rules) {
+      String result = rule.apply(n);
+      if (!result.isEmpty())
+        return result;
+    }
+    return "";
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{工厂方法：times}
+
+\begin{frame}[fragile]{引入工厂：times}
+  \begin{scala}
+import spock.lang.Specification
+
+import static fizz.buzz.whizz.Rule.times
+
+class RuleSpec extends Specification {
+  def "times(3) -> Fizz"() {
+    expect:
+    new Times(3, "Fizz").apply(3 * 2) == "Fizz"
+  }
+
+  def "factory: times(3) -> Fizz"() {
+    expect:
+    times(3, "Fizz").apply(3 * 2) == "Fizz"
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现工厂：Rule.times}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+
+  static Rule times(int n, String word) {
+    return new Times(n, word);
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{匿名内部类}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+
+  static Rule times(int n, String word) {
+    return new Rule() {
+      @Override
+      public String apply(int m) {
+        return m % n == 0 ? word : "";
+      }
+    };
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{工厂方法：contains}
+
+\begin{frame}[fragile]{引入工厂: contains}
+  \begin{scala}
+import spock.lang.Specification
+
+import static fizz.buzz.whizz.Rule.contains
+
+class RuleSpec extends Specification {
+  def "contains(3) -> Fizz"() {
+    expect:
+    new Contains(3, "Fizz").apply(13) == "Fizz"
+  }
+
+  def "factory: contains(3) -> Fizz"() {
+    expect:
+    contains(3, "Fizz").apply(13) == "Fizz"
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现工厂：Rule.contains}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+
+  static Rule contains(int n, String word) {
+    return new Contains(n, word);
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{匿名内部类}
+  \begin{java}
+import static java.lang.String.valueOf;
+
+public interface Rule {
+  String apply(int n);
+  
+  static Rule contains(int n, String word) {
+    return new Rule() {
+      @Override
+      public String apply(int m) {
+        return valueOf(m).contains(valueOf(m)) ? word : "";
+      }
+    };
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{工厂方法：defaults}
+
+\begin{frame}[fragile]{引入工厂: defaults}
+  \begin{scala}
+import spock.lang.Specification
+
+import static fizz.buzz.whizz.Rule.defaults
+
+class RuleSpec extends Specification {
+  def "default: 2 -> str(2)"() {
+    expect:
+    new Default().apply(2) == "2"
+  }
+
+  def "factory(default): 2 -> str(2)"() {
+    expect:
+    defaults().apply(2) == "2"
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现工厂：Rule.defaults}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+
+  static Rule defaults() {
+    return new Default();
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{匿名内部类}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+  
+  static Rule defaults() {
+    return new Rule() {
+      @Override
+      public String apply(int m) {
+        return String.valueOf(m);
+      }
+    };
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{工厂方法：allof}
+
+\begin{frame}[fragile]{引入工厂: allof}
+  \begin{scala}
+import spock.lang.Specification
+
+import static fizz.buzz.whizz.Rule.allof
+
+class RuleSpec extends Specification {
+  def "factory: times(3) && times(5) -> FizzBuzz"() {
+    expect:
+    allof(
+        times(3, "Fizz"),
+        times(5, "Buzz")
+    ).apply(3*5*7) == "FizzBuzz"
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现工厂：Rule.allof}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+
+  static Rule allof(Rule... rules) {
+    return new AllOf(rules);
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{匿名内部类}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+  
+  static Rule allof(Rule... rules) {
+    return new Rule() {
+      @Override
+      public String apply(int n) {
+        StringBuilder result = new StringBuilder();
+        for (Rule rule : rules) {
+          result.append(rule.apply(n));
+        }
+        return result.toString();
+      }
+    };
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{工厂方法：anyof}
+
+\begin{frame}[fragile]{引入工厂: anyof}
+  \begin{scala}
+import spock.lang.Specification
+
+import static fizz.buzz.whizz.Rule.anyof
+
+class RuleSpec extends Specification {
+  def "factory: times(3) || times(5) -> Fizz || Buzz"() {
+    expect:
+    anyof(
+        times(3, "Fizz"),
+        times(5, "Buzz"),
+    ).apply(3*5) == "Fizz"
+    
+    anyof(
+        times(5, "Buzz"),
+        times(3, "Fizz"),
+    ).apply(3*5) == "Buzz"    
+  }
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{实现工厂：Rule.anyof}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+
+  static Rule anyof(Rule... rules) {
+    return new AnyOf(rules);
+  }
+}
+  \end{java}
+\end{frame}
+
+\begin{frame}[fragile]{匿名内部类}
+  \begin{java}
+public interface Rule {
+  String apply(int n);
+  
+  static Rule anyof(Rule... rules) {
+    return new Rule() {
+      @Override
+      public String apply(int n) {
+        for (Rule rule : rules) {
+          String result = rule.apply(n);
+          if (!result.isEmpty())
+            return result;
+        }
+        return "";
+      }
+    };
+  }
+}
+  \end{java}
+\end{frame}
+
+\subsection{测试用例集}
+
+\begin{frame}[fragile]{测试规格}
+  \begin{scala}
+def spec() {
+  Rule r1_3 = times(3, "Fizz")
+  Rule r1_5 = times(5, "Buzz")
+  Rule r1_7 = times(7, "Whizz")
+
+  Rule r1 = anyof(r1_3, r1_5, r1_7)
+
+  Rule r2 = anyof(
+    allof(r1_3, r1_5, r1_7),
+    allof(r1_3, r1_5),
+    allof(r1_3, r1_7),
+    allof(r1_5, r1_7)
+  )
+
+  Rule r3 = contains(3, "Fizz"))
+  Rule rd = defaults()
+
+  anyof(r3, r2, r1, rd)
+}
+  \end{scala}
+\end{frame}
+
+\begin{frame}[fragile]{完备测试集}
+  \begin{scala}
+class RuleSpec extends Specification {  
+  def "fizz buzz whizz"() {
+    expect:
+    spec().apply(n) == expect
+
+    where:
+    n            | expect
+    3            | "Fizz"
+    5            | "Buzz"
+    7            | "Whizz"
+    3 * 5 * 7    | "FizzBuzzWhizz"
+    3 * 5        | "FizzBuzz"
+    3 * 7        | "FizzWhizz"
+    (5 * 7) * 2  | "BuzzWhizz"
+    13           | "Fizz"
+    35 /* 5*7 */ | "Fizz"  /* not "BuzzWhizz" */
+    2            | "2"
+  }
+}
+  \end{scala}
+\end{frame}
+

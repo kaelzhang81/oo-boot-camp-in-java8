@@ -1,0 +1,173 @@
+\section{命名}
+\label{sec:bad-smells}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{命名}}
+  \end{center}
+\end{frame}
+
+\subsection{命名风格}
+
+\begin{frame}[fragile]{驼峰}
+\begin{table}[!htb]
+\begin{tabular*}{1.0\textwidth}{@{}ll@{}}
+\hline
+Identifier & Examples \\
+\hline
+Namespace  & std, cut, mockcpp, tensorflow \\
+Class/Struct/Union & Timer, FutureTask, LinkedHashMap, HttpServlet \\ 
+Method & remove, ensureCapacity, getCrc \\
+Constant/Macro/Enum & IDLE, ACTIVE, MAX\_LINK\_NUM \\
+Local Variable & i, xref, houseNumber \\
+Type Parameter & T, E, K, V \\
+\hline
+\end{tabular*}
+\end{table}
+\end{frame}
+
+\subsection{类名}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+struct Run {
+  virtual ~Run() {}
+  virtual void run() = 0;
+};
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+struct Runnable {
+  virtual ~Runnable() {}
+  virtual void run() = 0;
+};
+  \end{c++}
+\end{frame}
+
+\subsection{布尔语义}
+
+\begin{frame}[fragile]{反例}
+\begin{enumerate}
+  \item We need to read the password
+  \item The password has already been read
+\end{enumerate}
+
+  \begin{c++}
+bool readPassword = true;
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+bool needPassword = true;
+bool userIsAuthenticated = true;
+  \end{c++}
+\end{frame}
+
+\subsection{短小精悍}
+
+\begin{frame}[fragile]{反例：记忆包袱}
+  \begin{c++}
+ControllerForEfficientHandlingOfStrings
+ControllerForEfficientStorageOfStrings
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{反例：作用域相关}
+  \begin{c++}
+void MutilEventListener::onDone() {
+  for(int index=0; index!=listeners.size(); index++) {
+    listeners[index].onEventDone();
+  }
+}
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+void MutilEventListener::onDone() {
+  for(int i = 0; i != listeners.size(); i++) {
+    listeners[i].onEventDone();
+  }
+}
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+void MutilEventListener::onDone() {
+  for(auto& listener : listeners) {
+    listener.onEventDone();
+  }
+}
+  \end{c++}
+\end{frame}
+
+\subsection{意图明确}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+vector<vector<int> > getThem() {
+  vector<vector<int> > list1;    
+  for(auto x : theList) {
+    if(x[0] == 4) {
+      list1.add(x);
+    }
+  }  
+  return list1;
+}
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+struct Cell {
+  bool isFlagged() const;
+
+private:
+  std::vector<int> states;
+};
+
+struct GameBoard {
+  using Cells = std::vector<Cell>;
+
+  void collectFlaggedCells(Cells& cells) const {
+    for(auto &cell : board) {
+      if(cell.isFlagged()) {
+        cells.push_back(cell);
+      }
+    }
+  }
+
+private:
+  Cells board;
+};
+  \end{c++}
+\end{frame}
+
+\subsection{领域专用}
+
+\begin{frame}[fragile]{统一语言}
+\begin{enumerate}
+  \item \alert{设计模式:} Factory, Visitor, Repository
+  \item \alert{工厂方法:} valueOf, of, getInstance, newInstance, newType
+  \item \alert{能力接口:} AppendAble, Closeable, Runnable, Readable, Invokable
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{丰富单词库}
+\begin{table}[!htb]
+\begin{tabular*}{1.0\textwidth}{@{}ll@{}}
+\hline
+Word & Alternatives \\
+\hline
+send  & deliver, dispatch, announce, distribute, route \\
+find & dsearch, extract, locate, recover \\ 
+start & launch, create, begin, open \\
+make & create, setup, build, generate, compose, add, new \\
+\hline
+\end{tabular*}
+\end{table}
+\end{frame}

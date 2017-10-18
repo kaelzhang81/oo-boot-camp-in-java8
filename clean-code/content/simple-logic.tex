@@ -1,0 +1,112 @@
+\section{简化逻辑}
+\label{sec:simple-logic}
+
+\begin{frame}
+  \begin{center}
+    \Huge{\textcolor{red}{简化逻辑}}
+  \end{center}
+\end{frame}
+
+\subsection{卫语句}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+if (userResult == SUCCESS) {
+  if (permissionResult != SUCCESS) {
+    reply.writeError(permissionResult);
+    return;
+  }
+  reply.writeError("");
+} else {
+  reply.writeError(usrResult);
+}
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+if (userResult != SUCCESS) {
+  reply.writeError(usrResult);
+  return;
+}
+
+if (permissionResult != SUCCESS) {
+  reply.writeError(permissionResult);
+  return;
+}
+
+reply.writeError("");
+  \end{c++}
+\end{frame}
+
+\subsection{三元表达式}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+if (hour >= 12)  {
+  time += "pm";
+} else {
+  time += "am";
+}
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+time_str += (hour >= 12) ? "pm" : "am";
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+return exponent >= 0 ? mantissa * (1 << exponent) : mantissa / (1 << -exponent);
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+if (exponent >= 0) {
+  return mantissa * (1 << exponent);
+} else {
+  return mantissa / (1 << -exponent);
+}
+  \end{c++}
+\end{frame}
+
+\subsection{解释型变量/查询函数}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+if (line.split(":")[0].trim() == "root")
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+String userName = line.split(":")[0].trim();
+if (userName == "root") {
+  // ...
+}
+  \end{c++}
+\end{frame}
+
+\subsection{YODA}
+
+\begin{frame}[fragile]{反例}
+  \begin{c++}
+if (MAX_STREAM_LEN == length)
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{正例}
+  \begin{c++}
+if (length == MAX_STREAM_LEN)
+  \end{c++}
+\end{frame}
+
+\begin{frame}[fragile]{英语表达}
+\begin{enumerate}
+  \item if you are at least 18 years old
+  \item if 18 years is less than or equal to your age
+\end{enumerate}
+\end{frame}
