@@ -10,7 +10,7 @@
 \subsection{卫语句}
 
 \begin{frame}[fragile]{反例}
-  \begin{c++}
+  \begin{java}
 if (userResult == SUCCESS) {
   if (permissionResult != SUCCESS) {
     reply.writeError(permissionResult);
@@ -20,11 +20,11 @@ if (userResult == SUCCESS) {
 } else {
   reply.writeError(usrResult);
 }
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
+  \begin{java}
 if (userResult != SUCCESS) {
   reply.writeError(usrResult);
   return;
@@ -36,72 +36,72 @@ if (permissionResult != SUCCESS) {
 }
 
 reply.writeError("");
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \subsection{三元表达式}
 
 \begin{frame}[fragile]{反例}
-  \begin{c++}
+  \begin{java}
 if (hour >= 12)  {
   time += "pm";
 } else {
   time += "am";
 }
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
-time_str += (hour >= 12) ? "pm" : "am";
-  \end{c++}
+  \begin{java}
+time += (hour >= 12) ? "pm" : "am";
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{反例}
-  \begin{c++}
+  \begin{java}
 return exponent >= 0 ? mantissa * (1 << exponent) : mantissa / (1 << -exponent);
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
+  \begin{java}
 if (exponent >= 0) {
   return mantissa * (1 << exponent);
 } else {
   return mantissa / (1 << -exponent);
 }
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \subsection{解释型变量/查询函数}
 
 \begin{frame}[fragile]{反例}
-  \begin{c++}
-if (line.split(":")[0].trim() == "root")
-  \end{c++}
+  \begin{java}
+if (line.split(":")[0].trim().equals("root"))
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
+  \begin{java}
 String userName = line.split(":")[0].trim();
-if (userName == "root") {
+if ("root".equals(userName)) {
   // ...
 }
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \subsection{YODA}
 
 \begin{frame}[fragile]{反例}
-  \begin{c++}
+  \begin{java}
 if (MAX_STREAM_LEN == length)
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
+  \begin{java}
 if (length == MAX_STREAM_LEN)
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{英语表达}

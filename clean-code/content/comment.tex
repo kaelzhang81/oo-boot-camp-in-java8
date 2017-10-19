@@ -10,21 +10,21 @@
 \subsection{命名优于注释}
 
 \begin{frame}[fragile]{反例}
-  \begin{c++}
+  \begin{java}
 int time; // elapsed time in days  
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
+  \begin{java}
 int elapsedTimeInDays;
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \subsection{坏味道}
 
 \begin{frame}[fragile]{冗余注释}
-\begin{c++}
+\begin{java}
 /**
  * Constructor
  */
@@ -32,10 +32,10 @@ InvokedAtMost(int times);
 
 /**
  * @param Invocation
- * @return bool
+ * @return boolean
  */
-bool matches(const Invocation&) const;
-\end{c++}
+boolean matches(Invocation invocation);
+\end{java}
 \end{frame}
 
 \begin{frame}[fragile]{常见坏味道}
@@ -57,11 +57,11 @@ bool matches(const Invocation&) const;
 \end{frame}
 
 \begin{frame}[fragile]{可读性}
-\begin{c++}
+\begin{java}
 // Fast version of "hash = (65599 * hash) + c"
 hash = (hash << 6) + (hash << 16) - hash + c;
 
 // kk::mm::ss, MM dd, yyyy
-std::string timePattern = "\\d{2}:\\d{2}:\\d{2}, \\d{2} \\d{2}, \\d{4}";
-\end{c++}
+String timePattern = "\\d{2}:\\d{2}:\\d{2}, \\d{2} \\d{2}, \\d{4}";
+\end{java}
 \end{frame}

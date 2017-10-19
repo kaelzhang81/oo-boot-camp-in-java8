@@ -1,4 +1,4 @@
-latexfile = quantity
+latexfile = oo-boot-camp
 
 all: prepare pdf
 

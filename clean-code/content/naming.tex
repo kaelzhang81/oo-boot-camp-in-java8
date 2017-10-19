@@ -15,10 +15,9 @@
 \hline
 Identifier & Examples \\
 \hline
-Namespace  & std, cut, mockcpp, tensorflow \\
 Class/Struct/Union & Timer, FutureTask, LinkedHashMap, HttpServlet \\ 
 Method & remove, ensureCapacity, getCrc \\
-Constant/Macro/Enum & IDLE, ACTIVE, MAX\_LINK\_NUM \\
+Constant & IDLE, ACTIVE, MAX\_LINK\_NUM \\
 Local Variable & i, xref, houseNumber \\
 Type Parameter & T, E, K, V \\
 \hline
@@ -29,21 +28,19 @@ Type Parameter & T, E, K, V \\
 \subsection{类名}
 
 \begin{frame}[fragile]{反例}
-  \begin{c++}
-struct Run {
-  virtual ~Run() {}
-  virtual void run() = 0;
+  \begin{java}
+public interface Run {
+  void run();
 };
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
-struct Runnable {
-  virtual ~Runnable() {}
-  virtual void run() = 0;
+  \begin{java}
+public interface Runnable {
+  void run();
 };
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \subsection{布尔语义}
@@ -54,97 +51,55 @@ struct Runnable {
   \item The password has already been read
 \end{enumerate}
 
-  \begin{c++}
-bool readPassword = true;
-  \end{c++}
+  \begin{java}
+boolean readPassword = true;
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
-bool needPassword = true;
-bool userIsAuthenticated = true;
-  \end{c++}
+  \begin{java}
+boolean needPassword = true;
+boolean userIsAuthenticated = true;
+  \end{java}
 \end{frame}
 
 \subsection{短小精悍}
 
 \begin{frame}[fragile]{反例：记忆包袱}
-  \begin{c++}
+  \begin{java}
 ControllerForEfficientHandlingOfStrings
 ControllerForEfficientStorageOfStrings
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{反例：作用域相关}
-  \begin{c++}
-void MutilEventListener::onDone() {
+  \begin{java}
+void onDone() {
   for(int index=0; index!=listeners.size(); index++) {
     listeners[index].onEventDone();
   }
 }
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
-void MutilEventListener::onDone() {
+  \begin{java}
+void onDone() {
   for(int i = 0; i != listeners.size(); i++) {
     listeners[i].onEventDone();
   }
 }
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \begin{frame}[fragile]{正例}
-  \begin{c++}
-void MutilEventListener::onDone() {
-  for(auto& listener : listeners) {
+  \begin{java}
+void onDone() {
+  for(Listener listener : listeners) {
     listener.onEventDone();
   }
 }
-  \end{c++}
-\end{frame}
-
-\subsection{意图明确}
-
-\begin{frame}[fragile]{反例}
-  \begin{c++}
-vector<vector<int> > getThem() {
-  vector<vector<int> > list1;    
-  for(auto x : theList) {
-    if(x[0] == 4) {
-      list1.add(x);
-    }
-  }  
-  return list1;
-}
-  \end{c++}
-\end{frame}
-
-\begin{frame}[fragile]{正例}
-  \begin{c++}
-struct Cell {
-  bool isFlagged() const;
-
-private:
-  std::vector<int> states;
-};
-
-struct GameBoard {
-  using Cells = std::vector<Cell>;
-
-  void collectFlaggedCells(Cells& cells) const {
-    for(auto &cell : board) {
-      if(cell.isFlagged()) {
-        cells.push_back(cell);
-      }
-    }
-  }
-
-private:
-  Cells board;
-};
-  \end{c++}
+  \end{java}
 \end{frame}
 
 \subsection{领域专用}
